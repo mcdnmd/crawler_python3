@@ -22,7 +22,8 @@ class Crawler:
         while self.pages.qsize() != 0:
             page = self.pages.get()
             self.CurrentPage = page
-            self.CurrentPage.load_content(self.get_content(self.CurrentPage.link))
+            self.CurrentPage.load_content(
+                self.get_content(self.CurrentPage.link))
             if self.CurrentPage.response is not None:
                 self.CurrentPage.create_filename()
                 self.download_content()

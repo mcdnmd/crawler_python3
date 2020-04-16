@@ -22,7 +22,8 @@ def main(argv):
         except ValueError as e:
             return sys.exit(e)
     elif len(argv) == 1 and argv[0] == "-h":
-        print('To launch crawler use: startup.py <start_url> <dir_to_upload> <depth>')
+        print('To launch crawler use: startup.py '
+              '<start_url> <dir_to_upload> <depth>')
         sys.exit()
     c = crawler.Crawler(link, directory)
     c.run()

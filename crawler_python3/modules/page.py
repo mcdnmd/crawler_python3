@@ -33,4 +33,5 @@ class Page:
     def create_filename(self):
         pattern = r'http.?://([\w./_-]*[^/])'
         compiled = re.compile(pattern)
-        self.filename = (compiled.findall(self.response.url)[0] + '.html').replace('/', '.')
+        self.filename = (compiled.findall(self.response.url)[0] + '.html')\
+            .replace('/', '.')

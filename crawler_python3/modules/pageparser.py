@@ -1,4 +1,3 @@
-import re
 from urllib.parse import urlparse, urljoin
 from modules.linkparser import LinkParser
 
@@ -53,4 +52,3 @@ class PageParser:
         parsed = urlparse(url)
         self.path = parsed.path
         return parsed.scheme + '://' + parsed.netloc + parsed.path
-

@@ -68,8 +68,6 @@ def main():
                 args.depth,
                 args.chunk_size,
                 args.simple_filter)
-    # url = urlparse("https://docs.python.org/3/library/urllib.parse.html")
-    # c = Crawler(url, os.getcwdb().decode() + "\\sites", 5, 512, ['.png', '.jpg', 'jpeg', '.gif'] )
     c.run()
 
 

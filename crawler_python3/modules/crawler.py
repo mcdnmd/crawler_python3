@@ -70,7 +70,6 @@ class Crawler:
             path = urlparse(url).path.replace('/', '')
             filename = str(Path(self.FOLDER, path))
             with open(f'{filename}', 'w+') as f:
-                #for chunk in html.iter_content(chunk_size=self.CHUNK_SIZE):
                 f.write(str(bytes(data['content'], data['encoding'])))
         except Exception as exc:
             logging.error('%r generated an exception: %s' % (url, exc))

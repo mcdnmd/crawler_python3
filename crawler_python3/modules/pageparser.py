@@ -3,14 +3,14 @@ from modules.linkparser import LinkParser
 
 
 class PageParser:
-    def __init__(self, scheme, netloc, image_filter):
+    def __init__(self, scheme, netloc, image_filter, visited):
         self.LinkParser = LinkParser()
         self.scheme = scheme
         self.netloc = netloc
         self.base_url = scheme + '://' + netloc
         self.path = None
         self.image_suffixes = image_filter
-        self.visited_pages = set()
+        self.visited_pages = visited
 
     def gen_links(self, html):
         for line in html:
@@ -36,10 +36,7 @@ class PageParser:
                     and not self.is_image(link):
                 result.append(link)
                 self.visited_pages.add(link)
-        if len(result) != 0:
-            return result
-        else:
-            return None
+        return result or None
 
     def normalize_links(self, links):
         return [self.normalize_link(link) for link in links]

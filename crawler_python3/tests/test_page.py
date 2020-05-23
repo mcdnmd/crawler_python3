@@ -1,10 +1,12 @@
+import os
 import unittest
 from modules.pageparser import PageParser
 
 LINK = "site_forUnitTests/new/folder/"
 SIMPLE_FILTER = ['.png', '.jpg', 'jpeg', '.gif']
 ROOT_LINK = "https://www.test.com/"
-TEST_PAGE = PageParser("https", "www.test.com", SIMPLE_FILTER)
+TEST_PAGE = PageParser("https", "www.test.com", SIMPLE_FILTER, set())
+PATH = os.path.abspath('test_page.py' + '/..') + "\\"
 
 
 class PageTest(unittest.TestCase):
@@ -40,7 +42,7 @@ class PageTest(unittest.TestCase):
     def test_extract_links_from_html(self):
         count = 0
         TEST_PAGE.LinkParser.hard_reset()
-        with open("extract_links_test.html", 'r') as html:
+        with open(PATH + "extract_links_test.html", 'r') as html:
             for _ in TEST_PAGE.gen_links(html):
                 count += 1
         self.assertEqual(7, count)
@@ -48,7 +50,7 @@ class PageTest(unittest.TestCase):
     def test_get_filtred_links(self):
         links = ["https://www.test.com/", "https://www.test.com/new_page"]
         TEST_PAGE.LinkParser.hard_reset()
-        with open("get_links_test_1.html", 'r') as html:
+        with open(PATH + "get_links_test_1.html", 'r') as html:
             result = TEST_PAGE.get_filtred_links(html)
         self.assertEqual(links, result)
 
@@ -58,9 +60,12 @@ class PageTest(unittest.TestCase):
         links.add("https://www.test.com/new_image_info.txt")
         links.add("https://www.test.com/new_page")
         TEST_PAGE.LinkParser.hard_reset()
-        with open("image_filter_test.html", 'r') as html:
+        with open(PATH + "image_filter_test.html", 'r') as html:
             result = TEST_PAGE.get_filtred_links(html)
         self.assertTrue(self.is_result_in_set(links, result))
+
+
+
 
     def is_result_in_set(self, links, result):
         count = 0

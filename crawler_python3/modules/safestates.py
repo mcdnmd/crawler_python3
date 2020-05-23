@@ -1,3 +1,4 @@
+import os
 import json
 import logging
 from modules.crawler import Crawler
@@ -10,46 +11,72 @@ class Url:
         self.path = path
 
 
-def safe_crawler_state(crawler, state):
-    if state is True:
-        crawler_fields = {
-            "inProcessFlag": True,
-            "fields": {
-                "protocol": crawler.protocol,
-                "netloc": crawler.netloc,
-                "path": crawler.path,
-                "folder": crawler.FOLDER,
-                "max_depth": crawler.MAX_DEPTH,
-                "chunk_size": crawler.CHUNK_SIZE,
-                "queue": crawler.queue,
-                "simple_filter": crawler.simple_filter}
-        }
-    else:
-        crawler_fields = {
-            "inProcessFlag": False,
-            "fields": {}
-        }
-    with open('dump.json', 'w+') as dump_file:
-        json.dump(crawler_fields, dump_file)
+class SetEncoder(json.JSONEncoder):
+    def default(self, obj):
+        if isinstance(obj, set):
+            return list(obj)
+        return json.JSONEncoder.default(self, obj)
 
 
-def load_crawler_state():
-    try:
-        dump_file = open('dump.json')
-        crawler_fields = json.load(dump_file)
-        return crawler_fields
-    except Exception as exc:
-        logging.error('Generated an exception while load dump: %s' % exc)
-        return None
+class StateHandler:
+    def __init__(self):
+        self.crawler = None
+        self.crawler_fields = None
+        self.PATH = os.path.abspath('startup.py' + '/..') + "\\"
 
+    def initialize(self, crawler):
+        self.crawler = crawler
 
-def load_crawler_from_dump(dump):
-    url = Url(dump['protocol'], dump['netloc'], dump['path'])
-    folder = dump['folder']
-    depth = dump['max_depth']
-    chunk_size = dump['chunk_size']
-    queue = dump['queue']
-    simple_filter = ['simple_filter']
-    c = Crawler(url, folder, depth, chunk_size, simple_filter)
-    c.queue = queue
-    return c
+    def safe_crawler_state(self, state):
+        if state is True:
+            self.crawler_fields = {
+                "inProcessFlag": True,
+                "fields": {
+                    "protocol": self.crawler.protocol,
+                    "netloc": self.crawler.netloc,
+                    "path": self.crawler.path,
+                    "folder": self.crawler.FOLDER,
+                    "max_depth": self.crawler.MAX_DEPTH,
+                    "current_depth": self.crawler.current_depth,
+                    "visited": self.crawler.visited,
+                    "chunk_size": self.crawler.CHUNK_SIZE,
+                    "queue": self.crawler.queue,
+                    "simple_filter": self.crawler.simple_filter}
+            }
+        else:
+            self.crawler_fields = {
+                "inProcessFlag": False,
+                "fields": {}
+            }
+        self.safe_state()
+
+    def safe_state(self):
+        with open(self.PATH + 'dump.json', 'w') as dump_file:
+            json.dump(self.crawler_fields, dump_file, cls=SetEncoder)
+
+    def load_crawler_state(self):
+        try:
+            with open(self.PATH + 'dump.json', 'r') as dump_file:
+                self.crawler_fields = json.load(dump_file)
+            return self.crawler_fields
+        except Exception as exc:
+            logging.error('Generated an exception while load dump: %s' % exc)
+            return None
+
+    def load_crawler_from_dump(self):
+        fields = self.crawler_fields['fields']
+        url = Url(fields['protocol'],
+                  fields['netloc'],
+                  fields['path'])
+        folder = fields['folder']
+        depth = fields['max_depth']
+        current_depth = fields['current_depth']
+        visited = set(fields['visited'])
+        chunk_size = fields['chunk_size']
+        queue = fields['queue']
+        simple_filter = fields['simple_filter']
+        c = Crawler(url, folder, depth, chunk_size, simple_filter, self)
+        c.queue = queue
+        c.current_dept = current_depth
+        c.visited = visited
+        return c

@@ -1,0 +1,1 @@
+python startup.py https://github.com/mcdnmd/ -f C:\\Users\\kpolt\\Documents\\py_script\\task_crawler\\trash

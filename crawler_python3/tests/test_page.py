@@ -6,7 +6,13 @@ LINK = "site_forUnitTests/new/folder/"
 SIMPLE_FILTER = ['.png', '.jpg', 'jpeg', '.gif']
 ROOT_LINK = "https://www.test.com/"
 TEST_PAGE = PageParser("https", "www.test.com", SIMPLE_FILTER, set())
-PATH = os.path.abspath('test_page.py' + '/..') + "\\"
+PATH = __file__
+if os.name == "nt":
+    PATH = '\\'.join(PATH.split('\\')[:-1])
+    PATH += "\\"
+else:
+    PATH = '/'.join(PATH.split('/')[:-1])
+    PATH += '/'
 
 
 class PageTest(unittest.TestCase):

@@ -8,13 +8,7 @@ from modules.pageparser import PageParser
 
 
 class Crawler:
-    def __init__(self,
-                 url,
-                 folder,
-                 depth,
-                 chunk_size,
-                 simple_filter,
-                 StateHandler):
+    def __init__(self, url, folder, depth, chunk_size, simple_filter, StateHandler):
         self.protocol = url.scheme
         self.netloc = url.netloc
         self.path = url.path
@@ -34,10 +28,7 @@ class Crawler:
     def run(self):
         link = self.make_link(self.path)
         self.StateHandler.initialize(self)
-        self.PageParser = PageParser(self.protocol,
-                                     self.netloc,
-                                     self.simple_filter,
-                                     self.visited)
+        self.PageParser = PageParser(self.protocol, self.netloc, self.simple_filter, self.visited)
         self.queue.append(link)
         self.conveyor()
 

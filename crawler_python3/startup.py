@@ -10,6 +10,7 @@ import argparse
 import os
 from urllib.parse import urlparse
 from modules.crawler import Crawler
+from modules import safestates
 
 
 def dir_path(string):
@@ -63,11 +64,15 @@ def main():
 
     args = parser.parse_args()
 
-    c = Crawler(args.url,
-                args.folder,
-                args.depth,
-                args.chunk_size,
-                args.simple_filter)
+    dump = safestates.load_crawler_state()
+    if dump is not None and dump['inProcessFlag'] is True:
+        c = safestates.load_crawler_from_dump(dump)
+    else:
+        c = Crawler(args.url,
+                    args.folder,
+                    args.depth,
+                    args.chunk_size,
+                    args.simple_filter)
     c.run()
 
 

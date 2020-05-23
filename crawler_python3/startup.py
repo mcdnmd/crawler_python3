@@ -6,28 +6,72 @@ if sys.version_info < (3, 7):
     print('Use python >= 3.7', file=sys.stderr)
     sys.exit(ERROR_PYTHON_VERSION)
 
-from modules import crawler
+import argparse
+import os
+from urllib.parse import urlparse
+from modules.crawler import Crawler
 
-MAX_DEPTH = 5
-VISITED = set()
+
+def dir_path(string):
+    if os.path.isdir(string):
+        return str(string)
+    else:
+        raise NotADirectoryError(string)
 
 
-def main(argv):
-    global MAX_DEPTH
-    if len(argv) == 3:
-        try:
-            link = str(argv[0])
-            directory = str(argv[1])
-            MAX_DEPTH = int(argv[2])
-        except ValueError as e:
-            return sys.exit(e)
-    elif len(argv) == 1 and argv[0] == "-h":
-        print('To launch crawler use: startup.py '
-              '<start_url> <dir_to_upload> <depth>')
-        sys.exit()
-    c = crawler.Crawler(link, directory)
+def wed_url(string):
+    result = urlparse(string)
+    if all([result.scheme, result.netloc, result.path]):
+        return result
+    else:
+        raise ValueError(string)
+
+
+def main():
+    parser = argparse.ArgumentParser()
+    parser.add_argument(
+        'url',
+        type=wed_url,
+        action="store",
+        help="site url or ip-address")
+    parser.add_argument(
+        '-f',
+        type=dir_path,
+        action="store",
+        dest="folder",
+        default=os.getcwdb().decode())
+    parser.add_argument(
+        '-s',
+        type=int,
+        action="store",
+        dest="chunk_size",
+        default=512)
+    parser.add_argument(
+        '-d',
+        type=int,
+        action="store",
+        dest="depth",
+        default=5,
+        help="maximal depth for crawler tree")
+    parser.add_argument(
+        '-ef',
+        type=int,
+        action="store",
+        dest="simple_filter",
+        default=['.png', '.jpg', 'jpeg', '.gif'],
+        help="extension filter")
+
+    args = parser.parse_args()
+
+    c = Crawler(args.url,
+                args.folder,
+                args.depth,
+                args.chunk_size,
+                args.simple_filter)
+    # url = urlparse("https://docs.python.org/3/library/urllib.parse.html")
+    # c = Crawler(url, os.getcwdb().decode() + "\\sites", 5, 512, ['.png', '.jpg', 'jpeg', '.gif'] )
     c.run()
 
 
 if __name__ == '__main__':
-    main(sys.argv[1:])
+    main()

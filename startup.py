@@ -1,9 +1,15 @@
+"""@package startup
+Documentation for startup module.
+
+This is a main module to prepare environment and launch crawler conveyor
+"""
+
 ERROR_PYTHON_VERSION = 3
 
 import sys
 
-if sys.version_info < (3, 7):
-    print('Use python >= 3.7', file=sys.stderr)
+if sys.version_info < (3, 8):
+    print('Use python >= 3.8', file=sys.stderr)
     sys.exit(ERROR_PYTHON_VERSION)
 
 import argparse
@@ -14,6 +20,11 @@ from modules.safestates import StateHandler
 
 
 def dir_path(string):
+    """
+    check if directory is exist
+    @param string directory path
+    @return string path
+    """
     if os.path.isdir(string):
         return str(string)
     else:
@@ -21,6 +32,11 @@ def dir_path(string):
 
 
 def wed_url(string):
+    """
+    parse url string
+    @param string: any url or ip-address of site
+    @return cortege with scheme, netloc and path
+    """
     result = urlparse(string)
     if all([result.scheme, result.netloc, result.path]):
         return result
@@ -29,6 +45,9 @@ def wed_url(string):
 
 
 def main():
+    """
+    parse commands from terminal and start or continue crawling site
+    """
     parser = argparse.ArgumentParser()
     parser.add_argument(
         'url',
@@ -67,16 +86,15 @@ def main():
     stateHandler = StateHandler()
     dump = stateHandler.load_crawler_state()
     if dump is not None and dump['inProcessFlag'] is True:
-        c = stateHandler.load_crawler_from_dump()
-
+        crawler = stateHandler.load_crawler_from_dump()
     else:
-        c = Crawler(args.url,
-                    args.folder,
-                    args.depth,
-                    args.chunk_size,
-                    args.simple_filter,
-                    StateHandler())
-    c.run()
+        crawler = Crawler(args.url,
+                          args.folder,
+                          args.depth,
+                          args.chunk_size,
+                          args.simple_filter,
+                          StateHandler())
+    crawler.run()
 
 
 if __name__ == '__main__':

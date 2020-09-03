@@ -1,3 +1,8 @@
+"""@package test_page
+Documentation for test_page module.
+
+Module responsible for testing util modules.
+"""
 import os
 import unittest
 from modules.pageparser import PageParser
@@ -6,10 +11,13 @@ LINK = "site_forUnitTests/new/folder/"
 SIMPLE_FILTER = ['.png', '.jpg', 'jpeg', '.gif']
 ROOT_LINK = "https://www.test.com/"
 TEST_PAGE = PageParser("https", "www.test.com", SIMPLE_FILTER, set())
-PATH = os.path.abspath('test_page.py' + '/..') + "\\"
+PATH = os.path.abspath('test_page.py' + '/..') + "/"
 
 
 class PageTest(unittest.TestCase):
+    """
+    unit tests
+    """
     def test_remove_extra(self):
         link = ROOT_LINK + "index.html#x-headers"
         TEST_PAGE.LinkParser.hard_reset()
@@ -51,7 +59,7 @@ class PageTest(unittest.TestCase):
         links = ["https://www.test.com/", "https://www.test.com/new_page"]
         TEST_PAGE.LinkParser.hard_reset()
         with open(PATH + "get_links_test_1.html", 'r') as html:
-            result = TEST_PAGE.get_filtred_links(html)
+            result = TEST_PAGE.get_filtered_links(html)
         self.assertEqual(links, result)
 
     def test_image_filter(self):
@@ -61,11 +69,8 @@ class PageTest(unittest.TestCase):
         links.add("https://www.test.com/new_page")
         TEST_PAGE.LinkParser.hard_reset()
         with open(PATH + "image_filter_test.html", 'r') as html:
-            result = TEST_PAGE.get_filtred_links(html)
+            result = TEST_PAGE.get_filtered_links(html)
         self.assertTrue(self.is_result_in_set(links, result))
-
-
-
 
     def is_result_in_set(self, links, result):
         count = 0

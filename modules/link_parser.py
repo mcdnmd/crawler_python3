@@ -1,5 +1,5 @@
-"""@package linkparser
-Documentation for linkparser module.
+"""@package link_parser
+Documentation for link_parser module.
 
 Module responsible for finding href links in HTML code.
 """

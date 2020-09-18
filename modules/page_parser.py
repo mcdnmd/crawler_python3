@@ -1,12 +1,12 @@
-"""@package pageparser
-Documentation for linkparser module.
+"""@package page_parser
+Documentation for page_parser module.
 
 Module responsible for verifying href links.
 """
 
 
 from urllib.parse import urlparse, urljoin
-from modules.linkparser import LinkParser
+from modules.link_parser import LinkParser
 
 
 class PageParser:

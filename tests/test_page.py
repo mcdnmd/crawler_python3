@@ -5,7 +5,11 @@ Module responsible for testing util modules.
 """
 import os
 import unittest
-from modules.pageparser import PageParser
+from urllib.parse import urlparse
+from modules.page_parser import PageParser
+from modules.crawler import Crawler
+from modules.robots_parser import RobotsParser
+from modules.safe_states import StateHandler
 
 LINK = "site_forUnitTests/new/folder/"
 SIMPLE_FILTER = ['.png', '.jpg', 'jpeg', '.gif']
@@ -72,6 +76,16 @@ class PageTest(unittest.TestCase):
             result = TEST_PAGE.get_filtered_links(html)
         self.assertTrue(self.is_result_in_set(links, result))
 
+    def test_robots_webrules(self):
+        link = "https://ru.wikipedia.org/robots.txt"
+        url = urlparse(link)
+        s = StateHandler()
+        c = Crawler(url,LINK,1,512,SIMPLE_FILTER, s)
+        r = RobotsParser()
+        result = r.get_strict_rules(c.make_robots_request())
+        self.assertTrue(len(result) == 249)
+
+
     def is_result_in_set(self, links, result):
         count = 0
         result_len = len(result)
@@ -79,3 +93,5 @@ class PageTest(unittest.TestCase):
             if link in links:
                 count += 1
         return result_len == count
+
+

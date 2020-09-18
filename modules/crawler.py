@@ -10,7 +10,8 @@ from urllib.request import urlopen
 from urllib.parse import urlparse
 from pathlib import Path
 from concurrent.futures import ThreadPoolExecutor
-from modules.pageparser import PageParser
+from modules.page_parser import PageParser
+from modules.robots_parser import RobotsParser
 
 
 class Crawler:
@@ -41,6 +42,7 @@ class Crawler:
         self.queue = []
         self.PageParser = None
         self.StateHandler = StateHandler
+        self.RobotsParser = RobotsParser()
         logging.warning('Crawler was started')
 
     def run(self):
@@ -57,6 +59,9 @@ class Crawler:
         """
         process queries from main queue
         """
+        logging.warning('Try to get robots.txt')
+        self.visited = set(self.RobotsParser.get_strict_rules(self.make_robots_request()))
+        logging.warning(f'{self.visited}')
         logging.info('Crawler`s conveyor was started')
         while not len(self.queue) == 0 and self.current_depth < self.MAX_DEPTH:
             futures = {}
@@ -93,6 +98,16 @@ class Crawler:
             encoding = conn.headers.get_content_charset() or 'UTF-8'
             return {"content": conn.read().decode(encoding),
                     "encoding": encoding}
+
+    def make_robots_request(self):
+        """
+        get robots. txt file from site
+        @return robots.txt content
+        """
+        url = self.make_link("/robots.txt")
+        with urlopen(url) as conn:
+            encoding = conn.headers.get_content_charset() or 'UTF-8'
+            return conn.read().decode(encoding)
 
     def make_link(self, path):
         """

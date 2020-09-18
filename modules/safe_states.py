@@ -1,5 +1,5 @@
-"""@package safestates
-Documentation for safestates module.
+"""@package safe_states
+Documentation for safe_states module.
 
 Module responsible for saving crawler current properties.
 """

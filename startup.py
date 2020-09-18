@@ -16,7 +16,7 @@ import argparse
 import os
 from urllib.parse import urlparse
 from modules.crawler import Crawler
-from modules.safestates import StateHandler
+from modules.safe_states import StateHandler
 
 
 def dir_path(string):

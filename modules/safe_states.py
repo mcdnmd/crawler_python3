@@ -46,13 +46,14 @@ class StateHandler:
     """
     saving and loading crawler properties
     """
-    def __init__(self):
+    def __init__(self, folder_path):
         """
         the constructor
         """
         self.crawler = None
         self.crawler_fields = None
-        self.PATH = os.path.abspath('startup.py' + '/..') + "\\"
+        self.PATH = folder_path
+        self.filename = os.path.join(folder_path, "swopstate.json")
 
     def initialize(self, crawler):
         """
@@ -61,14 +62,14 @@ class StateHandler:
         """
         self.crawler = crawler
 
-    def safe_crawler_state(self, state):
+    def fill_swopstate_fields(self, state):
         """
         safe current values of main crawler properties
         @param state: boolean flag for saving data
         """
         if state is True:
             self.crawler_fields = {
-                "inProcessFlag": True,
+                "needSwop": True,
                 "fields": {
                     "protocol": self.crawler.protocol,
                     "netloc": self.crawler.netloc,
@@ -83,8 +84,7 @@ class StateHandler:
             }
         else:
             self.crawler_fields = {
-                "inProcessFlag": False,
-                "fields": {}
+                "needSwop": False
             }
         self.safe_state()
 
@@ -92,7 +92,7 @@ class StateHandler:
         """
         write crawler properties into JSON dump in OS file system
         """
-        with open(self.PATH + 'dump.json', 'w') as dump_file:
+        with open(self.filename, 'w') as dump_file:
             json.dump(self.crawler_fields, dump_file, cls=SetEncoder)
 
     def load_crawler_state(self):
@@ -100,15 +100,16 @@ class StateHandler:
         load crawler properties from JSON dump
         @return dictionary contains of crawler properties
         """
-        try:
-            with open(self.PATH + 'dump.json', 'r') as dump_file:
+        if os.path.exists(self.filename):
+            with open(self.filename, 'r') as dump_file:
                 self.crawler_fields = json.load(dump_file)
+            logging.info("Crawler swopstate.json was loaded")
             return self.crawler_fields
-        except Exception as exc:
-            logging.error('Generated an exception while load dump: %s' % exc)
-            return None
+        else:
+            self.fill_swopstate_fields(False)
+            logging.info("New swopstate.json was created")
 
-    def load_crawler_from_dump(self):
+    def get_crawler_from_dump(self):
         """
         create crawler with properties
         @return Crawler handler

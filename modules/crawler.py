@@ -18,7 +18,13 @@ class Crawler:
     """
     release main conveyor
     """
-    def __init__(self, url, folder, depth, chunk_size, simple_filter, StateHandler):
+    def __init__(self,
+                 url,
+                 folder,
+                 depth,
+                 chunk_size,
+                 simple_filter,
+                 state_handler):
         """
         the constructor
         @param url: dictionary with scheme, netloc and path of URL
@@ -26,7 +32,7 @@ class Crawler:
         @param depth: maximal depth
         @param chunk_size: size of downloaded chunks
         @param simple_filter: prohibited file extensions
-        @param StateHandler: program state handler
+        @param state_handler: program state handler
         """
         self.protocol = url.scheme
         self.netloc = url.netloc
@@ -41,7 +47,7 @@ class Crawler:
         self.visited = set()
         self.queue = []
         self.PageParser = None
-        self.StateHandler = StateHandler
+        self.StateHandler = state_handler
         self.RobotsParser = RobotsParser()
         logging.warning('Crawler was started')
 
@@ -51,7 +57,10 @@ class Crawler:
         """
         link = self.make_link(self.path)
         self.StateHandler.initialize(self)
-        self.PageParser = PageParser(self.protocol, self.netloc, self.simple_filter, self.visited)
+        self.PageParser = PageParser(self.protocol,
+                                     self.netloc,
+                                     self.simple_filter,
+                                     self.visited)
         self.queue.append(link)
         self.conveyor()
 
@@ -60,8 +69,8 @@ class Crawler:
         process queries from main queue
         """
         logging.warning('Try to get robots.txt')
-        self.visited = set(self.RobotsParser.get_strict_rules(self.make_robots_request()))
-        logging.warning(f'{self.visited}')
+        self.visited = \
+            set(self.RobotsParser.get_strict_rules(self.make_robots_request()))
         logging.info('Crawler`s conveyor was started')
         while not len(self.queue) == 0 and self.current_depth < self.MAX_DEPTH:
             futures = {}
@@ -82,11 +91,12 @@ class Crawler:
                     self.download_page(url, data)
                 except Exception as e:
                     logging.error('%r generated an exception: %s' % (url, e))
-                else:
-                    logging.warning('%r page is %d bytes' % (url, len(data)))
+                #else:
+                #    logging.warning('%r page is %d bytes' % (url, len(data)))
             self.current_depth += 1
-            self.StateHandler.safe_crawler_state(True)
-        self.StateHandler.safe_crawler_state(False)
+            self.StateHandler.fill_swopstate_fields(True)
+            logging.warning("crawler safe current state")
+        self.StateHandler.fill_swopstate_fields(False)
 
     def make_content_request(self, url):
         """
@@ -130,5 +140,5 @@ class Crawler:
                 f.write(str(bytes(data['content'], data['encoding'])))
         except Exception as exc:
             logging.error('%r generated an exception: %s' % (url, exc))
-        else:
-            logging.warning('%s successfully download' % url)
+        #else:
+        #    logging.warning('%s successfully download' % url)

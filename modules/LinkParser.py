@@ -12,6 +12,7 @@ class LinkParser(HTMLParser):
     """
     HTML tags parsing
     """
+
     def __init__(self):
         """The constructor"""
         super().__init__()
@@ -32,6 +33,11 @@ class LinkParser(HTMLParser):
         @param attrs: attributes
         """
         if tag == "a":
-            for name, link in attrs:
-                if name == "href":
-                    self.links = chain(self.links, [link])
+            self.continue_cain(attrs, 'href')
+        elif tag == 'img':
+            self.continue_cain(attrs, "src")
+
+    def continue_cain(self, attrs, tag_name):
+        for name, link in attrs:
+            if name == tag_name:
+                self.links = chain(self.links, [link])

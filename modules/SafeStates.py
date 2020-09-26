@@ -8,23 +8,9 @@ Module responsible for saving crawler current properties.
 import os
 import json
 import logging
-from modules.crawler import Crawler
 
-
-class Url:
-    """
-    data structure
-    """
-    def __init__(self, protocol, netloc, path):
-        """
-        constructor
-        @param protocol: HTTP or HTTPS protocol
-        @param netloc: URL netloc
-        @param path:  URL path
-        """
-        self.scheme = protocol
-        self.netloc = netloc
-        self.path = path
+from modules.HTTPClient import Url
+from modules.Crawler import Crawler
 
 
 class SetEncoder(json.JSONEncoder):
@@ -79,8 +65,7 @@ class StateHandler:
                     "current_depth": self.crawler.current_depth,
                     "visited": self.crawler.visited,
                     "chunk_size": self.crawler.CHUNK_SIZE,
-                    "queue": self.crawler.queue,
-                    "simple_filter": self.crawler.simple_filter}
+                    "queue": self.crawler.url_queue}
             }
         else:
             self.crawler_fields = {
@@ -124,9 +109,8 @@ class StateHandler:
         visited = set(fields['visited'])
         chunk_size = fields['chunk_size']
         queue = fields['queue']
-        simple_filter = fields['simple_filter']
-        c = Crawler(url, folder, depth, chunk_size, simple_filter, self)
-        c.queue = queue
+        c = Crawler(url, folder, depth, chunk_size, self)
+        c.url_queue = queue
         c.current_dept = current_depth
         c.visited = visited
         return c

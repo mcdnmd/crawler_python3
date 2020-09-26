@@ -5,23 +5,35 @@ Module responsible for testing util modules.
 """
 import os
 import unittest
-from urllib.parse import urlparse
-from modules.page_parser import PageParser
-from modules.crawler import Crawler
-from modules.robots_parser import RobotsParser
-from modules.safe_states import StateHandler
+from urllib.parse import urlparse, urljoin
+from modules.PageParser import PageParser
+from modules.Crawler import Crawler
+from modules.RobotsParser import RobotsParser
+from modules.SafeStates import StateHandler
+from modules.TerminalParser import TerminalParser
 
 LINK = "site_forUnitTests/new/folder/"
 SIMPLE_FILTER = ['.png', '.jpg', 'jpeg', '.gif']
-ROOT_LINK = "https://www.test.com/"
-TEST_PAGE = PageParser("https", "www.test.com", SIMPLE_FILTER, set())
-PATH = os.path.abspath('test_page.py' + '/..') + "/"
+ROOT_LINK = "https://www.test.com"
+TEST_PAGE = PageParser("https", "www.test.com", set())
+PATH = os.path.abspath('test_page.py')
 
 
 class PageTest(unittest.TestCase):
     """
     unit tests
     """
+    def test_terminal_parser_weburl(self):
+        t = TerminalParser()
+        urls = ['htt://test.org',
+                'test.org',
+                'https:/test.org',
+                'htt://test.org',
+                'https://te_st.org']
+        for i in urls:
+            with self.subTest(i=i):
+                self.assertRaises(ValueError, lambda: t.verify_wed_url(i))
+
     def test_remove_extra(self):
         link = ROOT_LINK + "index.html#x-headers"
         TEST_PAGE.LinkParser.hard_reset()
@@ -54,7 +66,7 @@ class PageTest(unittest.TestCase):
     def test_extract_links_from_html(self):
         count = 0
         TEST_PAGE.LinkParser.hard_reset()
-        with open(PATH + "extract_links_test.html", 'r') as html:
+        with open(os.path.join(PATH, "extract_links_test.html"), 'r') as html:
             for _ in TEST_PAGE.gen_links(html):
                 count += 1
         self.assertEqual(7, count)
@@ -62,7 +74,7 @@ class PageTest(unittest.TestCase):
     def test_get_filtred_links(self):
         links = ["https://www.test.com/", "https://www.test.com/new_page"]
         TEST_PAGE.LinkParser.hard_reset()
-        with open(PATH + "get_links_test_1.html", 'r') as html:
+        with open(os.path.join(PATH, "get_links_test_1.html"), 'r') as html:
             result = TEST_PAGE.get_filtered_links(html)
         self.assertEqual(links, result)
 
@@ -72,7 +84,7 @@ class PageTest(unittest.TestCase):
         links.add("https://www.test.com/new_image_info.txt")
         links.add("https://www.test.com/new_page")
         TEST_PAGE.LinkParser.hard_reset()
-        with open(PATH + "image_filter_test.html", 'r') as html:
+        with open(os.path.join(PATH, "image_filter_test.html"), 'r') as html:
             result = TEST_PAGE.get_filtered_links(html)
         self.assertTrue(self.is_result_in_set(links, result))
 
@@ -80,11 +92,10 @@ class PageTest(unittest.TestCase):
         link = "https://ru.wikipedia.org/robots.txt"
         url = urlparse(link)
         s = StateHandler()
-        c = Crawler(url,LINK,1,512,SIMPLE_FILTER, s)
+        c = Crawler(url, LINK, 1, 512, SIMPLE_FILTER, s)
         r = RobotsParser()
         result = r.get_strict_rules(c.make_robots_request())
         self.assertTrue(len(result) == 249)
-
 
     def is_result_in_set(self, links, result):
         count = 0
@@ -93,5 +104,3 @@ class PageTest(unittest.TestCase):
             if link in links:
                 count += 1
         return result_len == count
-
-

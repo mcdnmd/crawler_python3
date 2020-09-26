@@ -6,19 +6,20 @@ Module responsible for verifying href links.
 
 
 from urllib.parse import urlparse, urljoin
-from modules.link_parser import LinkParser
+from modules.LinkParser import LinkParser
 
 
+# TODO rewrite ALL PARSING HTML METHODS!!!!!!
 class PageParser:
     """
     page parsing and URL verifying
     """
 
-    def __init__(self, scheme, netloc, image_filter, visited):
-        """ The constructor
+    def __init__(self, scheme, netloc, visited):
+        """
+        The constructor
         @param scheme: URL scheme
         @param netloc: URL netloc
-        @param image_filter: prohibited file extensions
         @param visited: set of visited links
         """
         self.LinkParser = LinkParser()
@@ -26,7 +27,6 @@ class PageParser:
         self.netloc = netloc
         self.base_url = scheme + '://' + netloc
         self.path = None
-        self.image_suffixes = image_filter
         self.visited_pages = visited
 
     def gen_links(self, html):
@@ -35,7 +35,7 @@ class PageParser:
         @param html: HTML file
         @return link
         """
-        for line in html:
+        for line in html.split('\n'):
             self.LinkParser.feed(line)
             yield from self.LinkParser.links
 
@@ -48,17 +48,6 @@ class PageParser:
         parsed = urlparse(url)
         return parsed.scheme == self.scheme and parsed.netloc == self.netloc
 
-    def is_image(self, url):
-        """
-        check is address point to image
-        @param url: URL of file
-        @return boolean
-        """
-        for suffix in self.image_suffixes:
-            if url.endswith(suffix):
-                return True
-        return False
-
     def get_filtered_links(self, html):
         """
         get links from HTML code
@@ -69,10 +58,8 @@ class PageParser:
         norm_links = self.normalize_links(self.gen_links(html))
         for link in norm_links:
             if self.link_domain_is_allowed(link) \
-                    and link not in self.visited_pages \
-                    and not self.is_image(link):
+                    and link not in self.visited_pages:
                 result.append(link)
-                self.visited_pages.add(link)
         return result or None
 
     def normalize_links(self, links):
@@ -100,4 +87,4 @@ class PageParser:
         """
         parsed = urlparse(url)
         self.path = parsed.path
-        return parsed.scheme + '://' + parsed.netloc + parsed.path
+        return urljoin(parsed.scheme + '://' + parsed.netloc, parsed.path)

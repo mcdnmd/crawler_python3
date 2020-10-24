@@ -10,22 +10,22 @@ from modules.LinkParser import LinkParser
 
 
 # TODO rewrite ALL PARSING HTML METHODS!!!!!!
+from modules.Url import Url
+
+
 class PageParser:
     """
     page parsing and URL verifying
     """
 
-    def __init__(self, scheme, netloc, visited):
+    def __init__(self, url, visited):
         """
         The constructor
-        @param scheme: URL scheme
-        @param netloc: URL netloc
+        @param url: Url class
         @param visited: set of visited links
         """
         self.LinkParser = LinkParser()
-        self.scheme = scheme
-        self.netloc = netloc
-        self.base_url = scheme + '://' + netloc
+        self.general_url = url
         self.path = None
         self.visited_pages = visited
 
@@ -46,45 +46,20 @@ class PageParser:
         @return boolean
         """
         parsed = urlparse(url)
-        return parsed.scheme == self.scheme and parsed.netloc == self.netloc
+        return parsed.scheme == self.general_url.scheme and \
+               parsed.netloc == self.general_url.netloc or url.startswith('/')
 
     def get_filtered_links(self, html):
         """
         get links from HTML code
         @param html: HTML file
-        @return list of links or None
+        @return list of classes Urls or None
         """
         result = []
-        norm_links = self.normalize_links(self.gen_links(html))
-        for link in norm_links:
-            if self.link_domain_is_allowed(link) \
+        links = self.gen_links(html)
+        for link in links:
+            url = urljoin(self.general_url.baseurl, link)
+            if self.link_domain_is_allowed(url) \
                     and link not in self.visited_pages:
-                result.append(link)
+                result.append(url)
         return result or None
-
-    def normalize_links(self, links):
-        """
-        normalize links and remove useless URL data
-        @param links: list of URL links
-        @return list of normalized links
-        """
-        return [self.normalize_link(link) for link in links]
-
-    def normalize_link(self, link):
-        """
-        remove useless URL data
-        @param link: URL link
-        @return string normalized link
-        """
-        base = self.base_url
-        return self.remove_extra(urljoin(base, link))
-
-    def remove_extra(self, url):
-        """
-        remove extra data on the end of URL link
-        @param url: URL link
-        @return string URL without URL metadata
-        """
-        parsed = urlparse(url)
-        self.path = parsed.path
-        return urljoin(parsed.scheme + '://' + parsed.netloc, parsed.path)

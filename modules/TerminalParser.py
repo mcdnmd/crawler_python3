@@ -1,9 +1,8 @@
 import argparse
 import os
-import random
 import re
-import string
 from urllib.parse import urlparse
+from pathlib import Path
 
 
 def create_folder(folder):
@@ -11,17 +10,7 @@ def create_folder(folder):
     safety create a new folder
     @param folder string path
     """
-    os.mkdir(folder)
-
-
-def get_random_folder_name():
-    """
-    generate random folder name
-    @return string folder name
-    """
-    return ''.join(random.choice(string.ascii_uppercase +
-                                 string.ascii_lowercase +
-                                 string.digits) for _ in range(8))
+    Path(folder).mkdir(parents=True)
 
 
 class TerminalParser:
@@ -29,21 +18,14 @@ class TerminalParser:
     parse input arguments
     """
     def __init__(self):
+        self.default_filters = [['css'], ['js'], ['xml']]
         self.SCHEME_FORMAT = re.compile(
             r"^(http|ftp)s?$",
             re.IGNORECASE
         )
-        self.NETLOC_FORMAT = re.compile(
-            r'(?:^(\w{1,255}):(.{1,255})@|^)'
-            r'(?:(?:(?=\S{0,253}(?:$|:))'
-            r'((?:[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?\.)+'
-            r'(?:[a-z0-9]{1,63})))'
-            r'|localhost)'
-            r'(:\d{1,5})?',
-            re.IGNORECASE
-        )
 
-    def verify_folder_path(self, folder):
+    @staticmethod
+    def verify_folder_path(folder):
         """
         check if directory is exist
         @param folder string name
@@ -75,12 +57,29 @@ class TerminalParser:
                 f"{scheme})")
         if not netloc:
             raise ValueError("No URL domain specified")
-        if not re.fullmatch(self.NETLOC_FORMAT, netloc):
-            raise ValueError(f"URL domain malformed (given {netloc})")
+        return result.geturl()
+
+    @staticmethod
+    def parse_filters(filters):
+        """
+        parsing different filters with size
+        @param filters: args
+        @return filter dictionary
+        """
+        filter_amount = len(filters)
+        result = {}
+        for i in range(filter_amount):
+            if filters[i][0].startswith('.'):
+                filter_name = filters[i][0].replace('.', '')
+            else:
+                filter_name = filters[i][0]
+            if len(filters[i]) == 2:
+                result[filter_name] = filters[i][1]
+            else:
+                result[filter_name] = -1
         return result
 
     # TODO add update option
-    # TODO add special file config
     def get_terminal_arguments(self):
         """
         parse terminal input arguments
@@ -97,11 +96,11 @@ class TerminalParser:
             type= self.verify_folder_path,
             action="store",
             dest="folder",
-            default=os.path.join(os.getcwdb().decode(),
-                                 get_random_folder_name()),
+            default=os.getcwd(),
             help="save folder")
         parser.add_argument(
-            '-th',
+            '-j',
+            '--threads',
             type=int,
             action="store",
             dest="max_threads",
@@ -114,4 +113,12 @@ class TerminalParser:
             dest="depth",
             default=5,
             help="maximal depth for site tree")
+        parser.add_argument(
+            '-F',
+            '--filter',
+            nargs='+',
+            action="append",
+            dest="filters",
+            default=self.default_filters,
+            help="add extension filter and size .<file_extension> <size>")
         return parser.parse_args()

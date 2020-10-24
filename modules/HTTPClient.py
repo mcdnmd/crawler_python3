@@ -5,25 +5,27 @@ Module responsible for processing HTTP requests
 """
 import os
 from urllib.request import urlopen, Request
+from urllib import error
+from modules.Url import Url
 
-
+"""
 class Url:
-    """
+    
     data structure
-    """
-
+    
     def __init__(self, protocol, netloc, path):
-        """
+        
         constructor
         @param protocol: HTTP or HTTPS protocol
         @param netloc: URL netloc
         @param path:  URL path
-        """
+
         self.scheme = protocol
         self.netloc = netloc
         self.path = path
         self.relative_path = os.path.dirname(path)
         self.basename = os.path.basename(path)
+"""
 
 
 class HTTPClient:
@@ -60,10 +62,14 @@ class HTTPClient:
         @return dictionary with headers, content and encoding
         """
         request = Request(url, method=http_method)
-        with urlopen(request, timeout=self.timeout) as conn:
-            encoding = conn.headers.get_content_charset() or 'UTF-8'
-            return {"url": conn.url,
-                    "code": conn.code,
-                    "headers": conn.headers,
-                    "content": conn.read().decode(encoding),
-                    "encoding": encoding}
+        try:
+            with urlopen(request, timeout=self.timeout) as conn:
+                encoding = conn.headers.get_content_charset() or 'UTF-8'
+                return {"url": url,
+                        "code": conn.code,
+                        "type": conn.headers['Content-Type'],
+                        "headers": conn.headers,
+                        "content": conn.read(),
+                        "encoding": encoding}
+        except error.HTTPError:
+            return {"url": url, "code": 500}

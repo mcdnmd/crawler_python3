@@ -18,6 +18,7 @@ class LinkParser(HTMLParser):
         super().__init__()
         self.links = iter([])
         self.reset()
+        self.BASE_TAGS = ['a', 'img', 'link', 'source']
 
     def hard_reset(self):
         """
@@ -34,7 +35,10 @@ class LinkParser(HTMLParser):
         """
         if tag == "a":
             self.continue_cain(attrs, 'href')
-        elif tag == 'img':
+        elif tag == "img" or tag == "script" or tag == "link" or tag == "source":
+            self.continue_cain(attrs, "src")
+        #  <source srcset="logo-480.png, logo-480-2x.png 2x">
+        elif tag == "source":
             self.continue_cain(attrs, "src")
 
     def continue_cain(self, attrs, tag_name):

@@ -4,11 +4,13 @@ Documentation for test_page module.
 Module responsible for testing util modules.
 """
 import os
+import sys
 import unittest
 from urllib.parse import urlparse, urljoin
+from unittest.mock import patch
 from modules.PageParser import PageParser
 from modules.Crawler import Crawler
-from modules.RobotsParser import RobotsParser
+from modules.RobotsHandler import RobotsParser
 from modules.SafeStates import StateHandler
 from modules.TerminalParser import TerminalParser
 
@@ -17,6 +19,7 @@ SIMPLE_FILTER = ['.png', '.jpg', 'jpeg', '.gif']
 ROOT_LINK = "https://www.test.com"
 TEST_PAGE = PageParser("https", "www.test.com", set())
 PATH = os.path.abspath('test_page.py')
+
 
 
 class PageTest(unittest.TestCase):

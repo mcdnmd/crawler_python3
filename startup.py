@@ -8,8 +8,8 @@ ERROR_PYTHON_VERSION = 3
 
 import sys
 
-if sys.version_info < (3, 8):
-    print('Use python >= 3.8', file=sys.stderr)
+if sys.version_info < (3, 4):
+    print('Use python >= 3.4', file=sys.stderr)
     sys.exit(ERROR_PYTHON_VERSION)
 
 from modules.Crawler import Crawler
@@ -23,18 +23,17 @@ def main():
     """
     launcher = TerminalParser()
     args = launcher.get_terminal_arguments()
+    if args.filters:
+        args.filters = launcher.parse_filters(args.filters)
 
     stateHandler = StateHandler(args.folder)
-    swop_state = stateHandler.load_crawler_state()
+    swap_state = stateHandler.load_crawler_state()
 
-    if swop_state is not None and swop_state['needSwop'] is True:
+    if swap_state['needSwap'] is True:
         crawler = stateHandler.get_crawler_from_dump()
     else:
-        crawler = Crawler(args.url,
-                          args.folder,
-                          args.depth,
-                          args.max_threads,
-                          StateHandler(args.folder))
+        crawler = Crawler(args.url, args.folder, args.depth, args.max_threads,
+                          args.filters, StateHandler(args.folder))
     crawler.run()
 
 

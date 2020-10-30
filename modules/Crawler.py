@@ -9,7 +9,7 @@ import logging
 from urllib.parse import urlparse, urljoin
 from concurrent.futures import ThreadPoolExecutor
 from modules.PageParser import PageParser
-from modules.RobotsHandler import RobotsParser
+from modules.RobotsHandler import RobotsHandler
 from modules.HTTPClient import HTTPClient
 from modules.FileSystemHandler import FileSystemHandler
 
@@ -42,7 +42,7 @@ class Crawler:
         self.FILTER_SET = filters
         self.PageParser = PageParser(self.general_url, self.visited)
         self.StateHandler = state_handler
-        self.RobotsParser = RobotsParser(str_url)
+        self.RobotsHandler = RobotsHandler(str_url)
         self.HTTPClient = HTTPClient(5)
         self.FileSystemHandler = FileSystemHandler()
         logging.warning('Crawler was started')
@@ -53,7 +53,7 @@ class Crawler:
         """
         logging.getLogger().setLevel(logging.INFO)
         self.StateHandler.initialize(self)
-        self.RobotsParser.initialize(self.HTTPClient)
+        self.RobotsHandler.initialize(self.HTTPClient)
         self.url_queue.append(self.general_url.URL)
         self.start_conveyor()
 
@@ -110,11 +110,12 @@ class Crawler:
         define content type and launch parsing methods
         @param data: response dictionary
         """
-        content_type, file_extension = self.define_content_type(data)
-        if content_type == 'text':
-            self.process_html_content(data)
-        elif file_extension in self.FILTER_SET:
-            self.process_filter_content(data, file_extension)
+        if data['code'] == 200:
+            content_type, file_extension = self.define_content_type(data)
+            if content_type == 'text':
+                self.process_html_content(data)
+            elif file_extension in self.FILTER_SET:
+                self.process_filter_content(data, file_extension)
 
     def process_html_content(self, data):
         """
@@ -155,7 +156,7 @@ class Crawler:
         @return list of rules
         """
         logging.info('Try to get robots.txt')
-        self.RobotsParser.get_rules(self.create_url('robots.txt'))
+        self.RobotsHandler.get_rules(self.create_url('robots.txt'))
 
     def create_url(self, path):
         """
@@ -210,8 +211,8 @@ class Crawler:
         @param url: url via string
         @return bool
         """
-        return url in self.RobotsParser.disallow_links and \
-               url not in self.RobotsParser.allow_links
+        return url in self.RobotsHandler.disallow_links and \
+               url not in self.RobotsHandler.allow_links
 
     def check_asset_size(self, length, file_extension):
         return self.FILTER_SET[file_extension] == -1 or \

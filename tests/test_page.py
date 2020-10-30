@@ -10,7 +10,7 @@ from urllib.parse import urlparse, urljoin
 from unittest.mock import patch
 from modules.PageParser import PageParser
 from modules.Crawler import Crawler
-from modules.RobotsHandler import RobotsParser
+from modules.RobotsHandler import RobotsHandler
 from modules.SafeStates import StateHandler
 from modules.TerminalParser import TerminalParser
 
@@ -96,7 +96,7 @@ class PageTest(unittest.TestCase):
         url = urlparse(link)
         s = StateHandler()
         c = Crawler(url, LINK, 1, 512, SIMPLE_FILTER, s)
-        r = RobotsParser()
+        r = RobotsHandler()
         result = r.get_strict_rules(c.make_robots_request())
         self.assertTrue(len(result) == 249)
 

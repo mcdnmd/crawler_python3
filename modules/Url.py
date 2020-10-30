@@ -1,17 +1,5 @@
 import os
-import re
 from urllib.parse import urlparse
-
-
-class UrlParserUtils:
-    def __init__(self):
-        self.ASSET_PATTERN = re.compile(
-            r'([.|\w|\s|-])*\.(?:jpg|jpeg|gif|png)',
-            re.IGNORECASE
-        )
-
-    def get_asset_filename(self, url):
-        return self.ASSET_PATTERN.fullmatch(url).group()
 
 
 class Url:

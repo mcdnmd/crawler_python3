@@ -8,7 +8,7 @@ from urllib.parse import urljoin
 from modules.Url import Url
 
 
-class RobotsParser:
+class RobotsHandler:
     """
     parser robots.txt files
     """

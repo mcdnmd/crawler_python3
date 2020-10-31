@@ -45,7 +45,7 @@ class RobotsHandler:
             self.parse_user_agent(line)
             if self.parse_rules_flag:
                 url = urljoin(self.general_url.baseurl,
-                    line.split(': ')[1].split(' ')[0])
+                              line.split(': ')[1].split(' ')[0])
                 if line.startswith(self.disallow_syntax):
                     self.disallow_links.append(url)
                 elif line.startswith(self.allow_syntax):

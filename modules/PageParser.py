@@ -9,10 +9,6 @@ from urllib.parse import urlparse, urljoin
 from modules.LinkParser import LinkParser
 
 
-# TODO rewrite ALL PARSING HTML METHODS!!!!!!
-from modules.Url import Url
-
-
 class PageParser:
     """
     page parsing and URL verifying

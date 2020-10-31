@@ -5,12 +5,11 @@ Module responsible for saving crawler current properties.
 """
 
 
-import os
 import json
 import logging
-
+import os
 from urllib.parse import urljoin
-from modules.HTTPClient import Url
+
 from modules.Crawler import Crawler
 
 
@@ -63,7 +62,6 @@ class StateHandler:
                     "path": self.crawler.general_url.path,
                     "folder": self.crawler.FOLDER,
                     "max_depth": self.crawler.MAX_DEPTH,
-                    #"chunk_size": self.crawler.CHUNK_SIZE,
                     "current_depth": self.crawler.current_depth,
                     "workers": self.crawler.workers,
                     "visited": self.crawler.visited,
@@ -116,7 +114,6 @@ class StateHandler:
         depth = fields['max_depth']
         current_depth = fields['current_depth']
         visited = set(fields['visited'])
-        #chunk_size = fields['chunk_size']
         max_threads = fields['workers']
         queue = fields['queue']
         filters = fields['filters']

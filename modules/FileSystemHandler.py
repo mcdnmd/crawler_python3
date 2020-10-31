@@ -9,8 +9,6 @@ import os
 import re
 from pathlib import Path
 
-from modules.Url import Url
-
 
 class FileSystemHandler:
     """
@@ -31,7 +29,7 @@ class FileSystemHandler:
         abs_filename = os.path.join(abs_dir_path, url.filename)
         self.ping_directory(abs_dir_path)
         try:
-            if type(content) is type(b''):
+            if isinstance(content, b''):
                 self.upload_asset(abs_filename, content)
             else:
                 self.upload_page(abs_filename, content)

@@ -3,29 +3,8 @@ Documentation for httpclient module.
 
 Module responsible for processing HTTP requests
 """
-import os
-from urllib.request import urlopen, Request
 from urllib import error
-from modules.Url import Url
-
-"""
-class Url:
-    
-    data structure
-    
-    def __init__(self, protocol, netloc, path):
-        
-        constructor
-        @param protocol: HTTP or HTTPS protocol
-        @param netloc: URL netloc
-        @param path:  URL path
-
-        self.scheme = protocol
-        self.netloc = netloc
-        self.path = path
-        self.relative_path = os.path.dirname(path)
-        self.basename = os.path.basename(path)
-"""
+from urllib.request import urlopen, Request
 
 
 class HTTPClient:

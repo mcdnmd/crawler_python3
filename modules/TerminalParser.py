@@ -88,12 +88,12 @@ class TerminalParser:
         parser = argparse.ArgumentParser()
         parser.add_argument(
             'url',
-            type= self.verify_wed_url,
+            type=self.verify_wed_url,
             action="store",
             help="site url or ip-address")
         parser.add_argument(
             '-f',
-            type= self.verify_folder_path,
+            type=self.verify_folder_path,
             action="store",
             dest="folder",
             default=os.getcwd(),

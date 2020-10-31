@@ -4,7 +4,6 @@ Documentation for crawler module.
 Module responsible for crawler conveyor logic.
 """
 
-import os
 import logging
 from urllib.parse import urlparse, urljoin
 from concurrent.futures import ThreadPoolExecutor
@@ -135,9 +134,8 @@ class Crawler:
         @param file_extension: asset extension
         """
         asset = data['content']
-        if self.check_asset_size(
-                data['headers']['Content-Length'],
-                file_extension):
+        if self.check_asset_size(data['headers']['Content-Length'],
+                                 file_extension):
             self.upload_asset(asset, Url(data['url']))
             return
         logging.info(f'Asset {data["url"]} large then available')
@@ -215,5 +213,5 @@ class Crawler:
                url not in self.RobotsHandler.allow_links
 
     def check_asset_size(self, length, file_extension):
-        return self.FILTER_SET[file_extension] == -1 or \
-               int(length) <= int(self.FILTER_SET[file_extension])
+        return self.FILTER_SET[file_extension] == -1 or int(length) <= int(
+            self.FILTER_SET[file_extension])

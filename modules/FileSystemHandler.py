@@ -29,7 +29,7 @@ class FileSystemHandler:
         abs_filename = os.path.join(abs_dir_path, url.filename)
         self.ping_directory(abs_dir_path)
         try:
-            if isinstance(content, b''):
+            if isinstance(content, type(b'')):
                 self.upload_asset(abs_filename, content)
             else:
                 self.upload_page(abs_filename, content)

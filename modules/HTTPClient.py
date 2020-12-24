@@ -52,3 +52,5 @@ class HTTPClient:
                         "encoding": encoding}
         except error.HTTPError:
             return {"url": url, "code": 500}
+        except error.URLError as e:
+            raise error.URLError(f'bad connection {e}')

@@ -18,7 +18,7 @@ class LinkParser(HTMLParser):
         super().__init__()
         self.links = iter([])
         self.reset()
-        self.HREF_TAGS = {'a'}
+        self.HREF_TAGS = {'a', 'link'}
         self.SRC_TAGS = {'iframe', 'img', 'link', 'source'}
 
     def hard_reset(self):

@@ -55,7 +55,6 @@ class PageParser:
         links = self.gen_links(html)
         for link in links:
             url = urljoin(self.general_url.baseurl, link)
-            if self.link_domain_is_allowed(url) \
-                    and link not in self.visited_pages:
+            if self.link_domain_is_allowed(url):
                 result.append(url)
         return result or None

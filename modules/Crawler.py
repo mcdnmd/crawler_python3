@@ -79,12 +79,14 @@ class Crawler:
         """
         futures = {}
         with ThreadPoolExecutor(max_workers=self.workers) as pool:
-            while self.url_queue:
-                request_url = self.url_queue.pop()
+            current_workers = 0
+            while self.url_queue and current_workers < self.workers:
+                request_url = self.url_queue.pop(0)
                 if self.is_url_disallow(request_url):
                     continue
                 future = pool.submit(self.get_website_data, request_url)
                 futures[future] = request_url
+                current_workers += 1
         logging.info('Task pull created')
         return futures
 
@@ -184,7 +186,8 @@ class Crawler:
         """
         if links is not None:
             for url in links:
-                self.url_queue.append(url)
+                if url not in self.visited and url not in self.url_queue:
+                    self.url_queue.append(url)
 
     # TODO: check functionality!
     def upload_page(self, content, url):

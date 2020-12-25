@@ -16,4 +16,5 @@ class UrlTest(unittest.TestCase):
     def test_complex_url(self):
         URL = 'https://tproger.ru/translations/regular-expression-python/'
         url = Url(URL)
-        self.assertEqual(url.dirname, '/translations/regular-expression-python')
+        self.assertEqual(url.dirname,
+                         '/translations/regular-expression-python')

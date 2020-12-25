@@ -34,6 +34,8 @@ class TerminalParser:
         if os.path.exists(folder):
             return str(folder)
         create_folder(folder)
+        if folder.endswith('/'):
+            folder = folder[:-1]
         return str(folder)
 
     def verify_wed_url(self, url):
@@ -66,17 +68,16 @@ class TerminalParser:
         @param filters: args
         @return filter dictionary
         """
-        filter_amount = len(filters)
         result = {}
-        for i in range(filter_amount):
-            if filters[i][0].startswith('.'):
-                filter_name = filters[i][0].replace('.', '')
+
+        for f in filters:
+            name = f[0]
+            name = name.replace('.', '')
+            if len(f) == 2:
+                size = f[1]
+                result[name] = size
             else:
-                filter_name = filters[i][0]
-            if len(filters[i]) == 2:
-                result[filter_name] = filters[i][1]
-            else:
-                result[filter_name] = -1
+                result[name] = -1
         return result
 
     # TODO add update option

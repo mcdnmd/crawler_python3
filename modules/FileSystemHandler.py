@@ -27,7 +27,7 @@ class FileSystemHandler:
         """
         abs_dir_path = folder + url.dirname
         abs_filename = os.path.join(abs_dir_path, url.filename)
-        self.ping_directory(abs_dir_path)
+        os.makedirs(abs_dir_path, exist_ok=True)
         try:
             if isinstance(content, type(b'')):
                 self.upload_asset(abs_filename, content)
@@ -35,10 +35,10 @@ class FileSystemHandler:
                 self.upload_page(abs_filename, content)
         except Exception as exc:
             logging.error(
-                f'{abs_filename} generated an exception while save file'
+                f' {abs_filename} generated an exception while save file'
                 f' {exc}')
         else:
-            logging.info(f'{abs_filename} successfully download')
+            logging.info(f' {abs_filename} successfully download')
 
     def ping_directory(self, abs_dir_path):
         """
@@ -47,9 +47,9 @@ class FileSystemHandler:
         """
         if not os.path.exists(abs_dir_path):
             self.create_directory(abs_dir_path)
-            logging.info(f'Creating folder {abs_dir_path}')
+            logging.info(f' Creating folder {abs_dir_path}')
             return
-        logging.info(f'Directory {abs_dir_path} exists')
+        logging.info(f' Directory {abs_dir_path} exists')
 
     @staticmethod
     def create_directory(abs_path):
@@ -61,10 +61,10 @@ class FileSystemHandler:
 
     @staticmethod
     def upload_page(filename, content):
-        with open(f'{filename}', 'w+') as f:
+        with open(f'{filename}', 'w') as f:
             f.write(content)
 
     @staticmethod
     def upload_asset(filename, content):
-        with open(f'{filename}', 'wb+') as f:
+        with open(f'{filename}', 'wb') as f:
             f.write(content)

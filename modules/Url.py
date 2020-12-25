@@ -15,7 +15,4 @@ class Url:
         self.abspath = os.path.join(self.dirname, self.filename)
 
     def get_file_name(self):
-        name = os.path.basename(self.path)
-        if name == '':
-            name += 'index.html'
-        return name
+        return os.path.basename(self.path) or 'index.html'

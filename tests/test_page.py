@@ -4,22 +4,16 @@ Documentation for test_page module.
 Module responsible for testing util modules.
 """
 import os
-import sys
 import unittest
-from urllib.parse import urlparse, urljoin
-from unittest.mock import patch
+from urllib.parse import urljoin
+
 from modules.PageParser import PageParser
-from modules.Crawler import Crawler
-from modules.RobotsHandler import RobotsHandler
-from modules.SafeStates import StateHandler
 from modules.TerminalParser import TerminalParser
+from modules.Url import Url
 
-LINK = "site_forUnitTests/new/folder/"
-SIMPLE_FILTER = ['.png', '.jpg', 'jpeg', '.gif']
 ROOT_LINK = "https://www.test.com"
-TEST_PAGE = PageParser("https", "www.test.com", set())
-PATH = os.path.abspath('test_page.py')
-
+pageparser = PageParser(Url("https://www.test.com"), set())
+PATH = os.path.dirname(__file__)
 
 
 class PageTest(unittest.TestCase):
@@ -31,79 +25,34 @@ class PageTest(unittest.TestCase):
         urls = ['htt://test.org',
                 'test.org',
                 'https:/test.org',
-                'htt://test.org',
-                'https://te_st.org']
+                'htt://test.org']
         for i in urls:
             with self.subTest(i=i):
                 self.assertRaises(ValueError, lambda: t.verify_wed_url(i))
 
-    def test_remove_extra(self):
-        link = ROOT_LINK + "index.html#x-headers"
-        TEST_PAGE.LinkParser.hard_reset()
-        result = TEST_PAGE.remove_extra(link)
-        self.assertEqual(ROOT_LINK + 'index.html', result)
-
-    def test_normalize_links(self):
-        links = [ROOT_LINK + "getRecords?apikey=$api_key&ticket=$ticket_id",
-                 ROOT_LINK + "shop.html",
-                 ROOT_LINK + "a_good_link",
-                 ROOT_LINK + "index?=.html?=query_in_data_base"]
-        NORMALIZE = ['https://www.test.com/getRecords',
-                     'https://www.test.com/shop.html',
-                     'https://www.test.com/a_good_link',
-                     'https://www.test.com/index']
-        TEST_PAGE.LinkParser.hard_reset()
-        result = TEST_PAGE.normalize_links(links)
-        self.assertEqual(NORMALIZE, result)
-
     def test_domain_is_allowed(self):
-        link = ROOT_LINK + "i_am_a_good_url"
-        TEST_PAGE.LinkParser.hard_reset()
-        self.assertEqual(True, TEST_PAGE.link_domain_is_allowed(link))
+        link = urljoin(ROOT_LINK, "i_am_a_good_url")
+        pageparser.LinkParser.hard_reset()
+        self.assertEqual(True, pageparser.link_domain_is_allowed(link))
 
     def test_domain_is_not_allowed(self):
         link = "http://www.test.com/i_am_a_bad_url"
-        TEST_PAGE.LinkParser.hard_reset()
-        self.assertEqual(False, TEST_PAGE.link_domain_is_allowed(link))
+        pageparser.LinkParser.hard_reset()
+        self.assertEqual(False, pageparser.link_domain_is_allowed(link))
 
     def test_extract_links_from_html(self):
         count = 0
-        TEST_PAGE.LinkParser.hard_reset()
-        with open(os.path.join(PATH, "extract_links_test.html"), 'r') as html:
-            for _ in TEST_PAGE.gen_links(html):
+        pageparser.LinkParser.hard_reset()
+        filename = os.path.join(PATH, "test_samples/extract_links_test.html")
+        with open(filename, 'r') as html:
+            for _ in pageparser.gen_links(html.read()):
                 count += 1
         self.assertEqual(7, count)
 
     def test_get_filtred_links(self):
         links = ["https://www.test.com/", "https://www.test.com/new_page"]
-        TEST_PAGE.LinkParser.hard_reset()
-        with open(os.path.join(PATH, "get_links_test_1.html"), 'r') as html:
-            result = TEST_PAGE.get_filtered_links(html)
+        pageparser.LinkParser.hard_reset()
+        filename = os.path.join(PATH, "test_samples/get_links_test_1.html")
+        with open(filename, 'r') as html:
+            result = pageparser.get_filtered_links(html.read())
         self.assertEqual(links, result)
-
-    def test_image_filter(self):
-        links = set()
-        links.add("https://www.test.com/")
-        links.add("https://www.test.com/new_image_info.txt")
-        links.add("https://www.test.com/new_page")
-        TEST_PAGE.LinkParser.hard_reset()
-        with open(os.path.join(PATH, "image_filter_test.html"), 'r') as html:
-            result = TEST_PAGE.get_filtered_links(html)
-        self.assertTrue(self.is_result_in_set(links, result))
-
-    def test_robots_webrules(self):
-        link = "https://ru.wikipedia.org/robots.txt"
-        url = urlparse(link)
-        s = StateHandler()
-        c = Crawler(url, LINK, 1, 512, SIMPLE_FILTER, s)
-        r = RobotsHandler()
-        result = r.get_strict_rules(c.make_robots_request())
-        self.assertTrue(len(result) == 249)
-
-    def is_result_in_set(self, links, result):
-        count = 0
-        result_len = len(result)
-        for link in result:
-            if link in links:
-                count += 1
-        return result_len == count

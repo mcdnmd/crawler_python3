@@ -39,7 +39,7 @@ class StateHandler:
         self.crawler = None
         self.crawler_fields = None
         self.PATH = folder_path
-        self.filename = os.path.join(folder_path, "swapstate.json")
+        self.filename = os.path.join(folder_path, "currentstate.json")
 
     def initialize(self, crawler):
         """
@@ -48,29 +48,29 @@ class StateHandler:
         """
         self.crawler = crawler
 
-    def fill_swapstate_fields(self, flag):
+    def fill_json_fields(self, flag):
         """
         safe current crawler properties values
         @param flag: boolean flag for saving data
         """
         if flag is True:
             self.crawler_fields = {
-                "needSwap": True,
+                "downloadRequired": True,
                 "fields": {
                     "protocol": self.crawler.general_url.scheme,
                     "netloc": self.crawler.general_url.netloc,
                     "path": self.crawler.general_url.path,
-                    "folder": self.crawler.FOLDER,
-                    "max_depth": self.crawler.MAX_DEPTH,
-                    "current_depth": self.crawler.current_depth,
+                    "folder": self.crawler.folder,
+                    "maxDepth": self.crawler.max_depth,
+                    "currentDepth": self.crawler.current_depth,
                     "workers": self.crawler.workers,
                     "visited": self.crawler.visited,
                     "queue": self.crawler.url_queue,
-                    "filters": self.crawler.FILTER_SET}
+                    "filters": self.crawler.filters}
             }
         else:
             self.crawler_fields = {
-                "needSwap": False
+                "downloadRequired": False
             }
         self.safe_state()
 
@@ -78,7 +78,7 @@ class StateHandler:
         """
         "cold" boot creation a JSON structure
         """
-        self.crawler_fields = {"needSwap": False}
+        self.crawler_fields = {"downloadRequired": False}
         self.safe_state()
 
     def safe_state(self):
@@ -96,10 +96,10 @@ class StateHandler:
         if os.path.exists(self.filename):
             with open(self.filename, 'r') as dump_file:
                 self.crawler_fields = json.load(dump_file)
-            logging.info("Crawler swapstate.json was loaded")
+            logging.info("Crawler currentstate.json was loaded")
         else:
             self.create_an_empty_swap_state()
-            logging.info("New swapstate.json was created")
+            logging.info("New currentstate.json was created")
         return self.crawler_fields
 
     def get_crawler_from_dump(self):
@@ -111,8 +111,8 @@ class StateHandler:
         url = urljoin(fields['protocol'] + '://' + fields['netloc'],
                       fields['path'])
         folder = fields['folder']
-        depth = fields['max_depth']
-        current_depth = fields['current_depth']
+        depth = fields['maxDepth']
+        current_depth = fields['currentDepth']
         visited = set(fields['visited'])
         max_threads = fields['workers']
         queue = fields['queue']

@@ -4,7 +4,6 @@ Documentation for page_parser module.
 Module responsible for verifying href links.
 """
 
-
 from urllib.parse import urlparse, urljoin
 from modules.LinkParser import LinkParser
 
@@ -42,8 +41,9 @@ class PageParser:
         @return boolean
         """
         parsed = urlparse(url)
-        return parsed.scheme == self.general_url.scheme and \
-               parsed.netloc == self.general_url.netloc or url.startswith('/')
+        r1 = parsed.scheme == self.general_url.scheme
+        r2 = parsed.netloc == self.general_url.netloc or url.startswith('/')
+        return r1 and r2
 
     def get_filtered_links(self, html):
         """

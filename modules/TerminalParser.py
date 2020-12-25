@@ -94,6 +94,7 @@ class TerminalParser:
             help="site url or ip-address")
         parser.add_argument(
             '-f',
+            '--folder',
             type=self.verify_folder_path,
             action="store",
             dest="folder",

@@ -49,7 +49,7 @@ class CrawlerTestLogic(unittest.TestCase):
                                 1024, "utf-8"))
         SIDE_EFFECTS.append(
             self.get_reply_text("styles/style.css", URL + "/styles/style.css",
-                                "text/html",
+                                "text/css",
                                 1024, "utf-8"))
         SIDE_EFFECTS.append(
             self.get_reply_text("main_page.html", URL + "/main_page.html",

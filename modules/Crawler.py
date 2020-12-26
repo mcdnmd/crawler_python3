@@ -42,7 +42,7 @@ class Crawler:
         self.PageParser = PageParser(self.general_url, self.visited)
         self.StateHandler = state_handler
         self.RobotsHandler = robotparser.RobotFileParser()
-        self.HTTPClient = HTTPClient(5)
+        self.HTTPClient = HTTPClient(2)
         self.FileSystemHandler = FileSystemHandler()
 
     def run(self):
@@ -59,7 +59,7 @@ class Crawler:
         process queries from main queue
         """
         self.upload_crawling_rules()
-        logging.info('Crawler was started')
+        logging.info(' Crawler was started')
         while self.url_queue and self.current_depth < self.max_depth:
             futures = self.get_futures_pull()
             self.execute_pull_tasks(futures)
@@ -74,15 +74,14 @@ class Crawler:
         @return list of future
         """
         futures = {}
+        logging.info(' Creating task pool')
         with ThreadPoolExecutor(max_workers=self.workers) as pool:
-            current_workers = 0
-            while self.url_queue and current_workers < self.workers:
+            while self.url_queue:
                 request_url = self.url_queue.pop(0)
                 if not self.is_url_allow(request_url):
                     continue
                 future = pool.submit(self.get_website_data, request_url)
                 futures[future] = request_url
-                current_workers += 1
         return futures
 
     def execute_pull_tasks(self, futures):
@@ -94,7 +93,7 @@ class Crawler:
             try:
                 data = f.result()
             except Exception as e:
-                logging.error(f'{current_url} generated an exception '
+                logging.error(f' {current_url} generated an exception '
                               f'while request data: {e}')
             else:
                 self.process_data_response(data)
@@ -134,7 +133,7 @@ class Crawler:
                                  file_extension):
             self.upload_asset(asset, Url(data['url']))
             return
-        logging.info(f'Asset {data["url"]} large then available')
+        logging.info(f' Asset {data["url"]} large then available')
 
     def get_website_data(self, url):
         """
@@ -149,7 +148,7 @@ class Crawler:
         launch RobotsParser for getting robots.txt
         @return list of rules
         """
-        logging.info('Try to get robots.txt')
+        logging.info(' Try to get robots.txt')
         self.RobotsHandler.set_url(self.create_url('robots.txt'))
         self.RobotsHandler.read()
 

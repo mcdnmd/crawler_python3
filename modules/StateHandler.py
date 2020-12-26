@@ -8,6 +8,7 @@ Module responsible for saving crawler current properties.
 import json
 import logging
 import os
+import time
 from urllib.parse import urljoin
 
 from modules.Crawler import Crawler
@@ -96,10 +97,11 @@ class StateHandler:
         if os.path.exists(self.filename):
             with open(self.filename, 'r') as dump_file:
                 self.crawler_fields = json.load(dump_file)
-            logging.info("Crawler currentstate.json was loaded")
+            logging.info(f" {time.time()} Crawler currentstate.json was "
+                         f"loaded")
         else:
             self.create_an_empty_swap_state()
-            logging.info("New currentstate.json was created")
+            logging.info(f" {time.time()} New currentstate.json was created")
         return self.crawler_fields
 
     def get_crawler_from_dump(self):

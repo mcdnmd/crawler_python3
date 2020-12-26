@@ -23,6 +23,7 @@ Version: 2.0
 * `-j MAX_THREADS`, `--threads MAX_THREADS` указать максимальное кол-во MAX_THREADS возможных потоков (по умолчанию: 2 * кол-во ядер)
 * `-d DEPTH` указать DEPTH глубину скачивания сайта (по умолчанию: 5)
 * `-F FILTERS`, `--filter FILTERS` указать допустимые FILTERS сначало идет расширение, а затем макимальный размер (по умолчанию: css, js, xml)
+* `-U`, `--update` обновить файлы сайта в выбраной папке
 
 ### Пример использования фильтров
 `python3 startup.py --filter .png 800 -f .jpeg https://somewebsite.url`

@@ -55,6 +55,7 @@ class CrawlerTestLogic(unittest.TestCase):
         size_required = os.path.getsize(
             os.path.join(os.path.dirname(__file__),
                          'site/updatedsite/index.html'))
+        shutil.rmtree(FOLDER)
         self.assertEqual(size_required, size)
 
     def fill_downloaded_side_effects(self):
@@ -147,6 +148,3 @@ class CrawlerTestLogic(unittest.TestCase):
                 self.show_folder(abs_path, result)
             else:
                 result.append(abs_path)
-
-    def tearDown(self):
-        shutil.rmtree(FOLDER)

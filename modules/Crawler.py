@@ -165,7 +165,7 @@ class Crawler:
             self.visited.add(data['url'])
             return
         if self.check_asset_size(data['headers']['Content-Length'],
-                                     file_extension):
+                                 file_extension):
             self.upload_asset(asset, Url(data['url']))
             self.visited.add(data['url'])
             return
@@ -246,4 +246,3 @@ class Crawler:
     def check_asset_size(self, length, file_extension):
         return self.filters[file_extension] == -1 or int(length) <= int(
             self.filters[file_extension])
-

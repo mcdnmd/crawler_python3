@@ -27,7 +27,7 @@ class FileSystemHandler:
         """
         abs_dir_path = folder + url.dirname
         abs_filename = os.path.join(abs_dir_path, url.filename)
-        self.ping_directory(abs_filename)
+        os.makedirs(abs_dir_path, exist_ok=True)
         try:
             if isinstance(content, type(b'')):
                 self.upload_asset(abs_filename, content)

@@ -49,5 +49,6 @@ def choose_script(folder, update_all, url, depth, max_threads, filters):
                           filters, StateHandler(folder))
     return crawler
 
+
 if __name__ == '__main__':
     main()

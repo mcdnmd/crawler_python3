@@ -15,6 +15,11 @@ from modules.FileSystemHandler import FileSystemHandler
 from modules.Url import Url
 
 
+class CrawlerMode:
+    DOWNLOAD = 0
+    UPDATE = 1
+
+
 class Crawler:
     """
     release main conveyor
@@ -49,25 +54,27 @@ class Crawler:
         """
         launch crawler conveyor
         """
-        logging.getLogger().setLevel(logging.INFO)
         self.StateHandler.initialize(self)
         self.url_queue.append(self.general_url.URL)
-        self.start_conveyor()
+        self.start_download_conveyor(CrawlerMode.DOWNLOAD)
 
-    def start_conveyor(self):
+    def update(self, last_time):
+        self.StateHandler.initialize(self)
+        self.start_download_conveyor(CrawlerMode.UPDATE, last_time)
+
+    def start_download_conveyor(self, mode, last_time=''):
         """
         process queries from main queue
         """
         self.upload_crawling_rules()
-        logging.info(' Crawler was started')
+        logging.info(' Crawler start download pages')
         while self.url_queue and self.current_depth < self.max_depth:
             futures = self.get_futures_pull()
-            self.execute_pull_tasks(futures)
+            self.execute_pull_tasks(futures, mode, last_time)
             self.current_depth += 1
             self.StateHandler.fill_json_fields(True)
         self.StateHandler.fill_json_fields(False)
 
-    # TODO implement update option
     def get_futures_pull(self):
         """
         get concurrent.futures execute task pull
@@ -84,7 +91,7 @@ class Crawler:
                 futures[future] = request_url
         return futures
 
-    def execute_pull_tasks(self, futures):
+    def execute_pull_tasks(self, futures, mode, last_time):
         """
         execute tasks from pool
         """
@@ -96,7 +103,10 @@ class Crawler:
                 logging.error(f' {current_url} generated an exception '
                               f'while request data: {e}')
             else:
-                self.process_data_response(data)
+                if mode == CrawlerMode.DOWNLOAD:
+                    self.process_data_response(data)
+                else:
+                    self.process_update_response(data, last_time)
 
     def process_data_response(self, data):
         """
@@ -107,31 +117,57 @@ class Crawler:
         if data['code'] == 200:
             content_type, file_extension = self.define_content_type(data)
             if content_type == 'text':
-                self.process_html_content(data)
+                self.process_html_content(data, CrawlerMode.DOWNLOAD)
             elif file_extension in self.filters:
-                self.process_filtered_content(data, file_extension)
+                self.process_filtered_content(data, file_extension,
+                                              CrawlerMode.DOWNLOAD)
 
-    def process_html_content(self, data):
+    def process_update_response(self, data, last_time):
+        if data['code'] == 200:
+            try:
+                modify_data = data['headers']['Last-Modified']
+            except Exception:
+                self.process_update_content(data)
+                return
+            else:
+                if modify_data != last_time:
+                    self.process_update_content(data)
+
+    def process_update_content(self, data):
+        content_type, file_extension = self.define_content_type(data)
+        if content_type == 'text':
+            self.process_html_content(data, CrawlerMode.UPDATE)
+        elif file_extension in self.filters:
+            self.process_filtered_content(data, file_extension,
+                                          CrawlerMode.UPDATE)
+
+    def process_html_content(self, data, mode):
         """
         processing html data. Extract links and upload content
         @param data: http response dictionary
         """
         content = data['content'].decode(data['encoding'])
-        self.add_parsed_links_in_queue(
-            self.PageParser.get_filtered_links(content))
+        if mode == CrawlerMode.DOWNLOAD:
+            self.add_parsed_links_in_queue(
+                self.PageParser.get_filtered_links(content))
         self.upload_page(content, Url(data['url']))
         self.visited.add(data['url'])
 
-    def process_filtered_content(self, data, file_extension):
+    def process_filtered_content(self, data, file_extension, mode):
         """
         processing assets data. Starts uploading file content
         @param data: http response dictionary
         @param file_extension: asset extension
         """
         asset = data['content']
-        if self.check_asset_size(data['headers']['Content-Length'],
-                                 file_extension):
+        if mode == CrawlerMode.UPDATE:
             self.upload_asset(asset, Url(data['url']))
+            self.visited.add(data['url'])
+            return
+        if self.check_asset_size(data['headers']['Content-Length'],
+                                     file_extension):
+            self.upload_asset(asset, Url(data['url']))
+            self.visited.add(data['url'])
             return
         logging.info(f' Asset {data["url"]} large then available')
 
@@ -210,3 +246,4 @@ class Crawler:
     def check_asset_size(self, length, file_extension):
         return self.filters[file_extension] == -1 or int(length) <= int(
             self.filters[file_extension])
+

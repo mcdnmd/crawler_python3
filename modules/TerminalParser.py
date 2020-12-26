@@ -123,4 +123,11 @@ class TerminalParser:
             dest="filters",
             default=self.default_filters,
             help="add extension filter and size .<file_extension> <size>")
+        parser.add_argument(
+            '-U',
+            '--update',
+            action='store_true',
+            dest='update_all',
+            default=False,
+            help='update chose site (required downloaded content in folder)')
         return parser.parse_args()
